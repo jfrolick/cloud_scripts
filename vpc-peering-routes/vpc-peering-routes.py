@@ -5,6 +5,7 @@ import boto3
 import sys
 import re
 import ipdb
+from botocore.exceptions import ClientError
 
 
 route_table_filter = 'private'
@@ -193,15 +194,26 @@ def add_routes(_route_tables, connection_id, cidr, filter):
                 if 'VpcPeeringConnectionId' in route:
                     if 'DestinationCidrBlock' in route:
                         if cidr == route['DestinationCidrBlock']:
-                            print "Matched CIDR block."
+                            print "\tRoute exists for cidr " + cidr + \
+                                " in table " + route_table + \
+                                " to destination " + connection_id
                             break
-                    # print route['VpcPeeringConnectionId']
-                # else:
-                #     print "Not a peering connection"
             else:
-                print "Adding route for cidr " + cidr + \
+                print "\tAdding route for cidr " + cidr + \
                     " to table " + route_table + \
                     " with destination " + connection_id
+                try:
+                    client.create_route(
+                        RouteTableId = route_table,
+                        DestinationCidrBlock = cidr,
+                        VpcPeeringConnectionId = connection_id
+                    )
+                except ClientError as e:
+                    if e.response['Error']['Code'] == "RouteAlreadyExists":
+                        print "Route exists."
+                    else:
+                        print(e)
+                        sys.exit(1)
 
 
 my_account = get_account_number()
@@ -250,4 +262,4 @@ for i, c in enumerate(connections):
         route_table_filter
     )
 
-    # print "\n"
+    print "\n"
