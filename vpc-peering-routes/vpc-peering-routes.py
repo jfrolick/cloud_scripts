@@ -69,8 +69,8 @@ def get_active_peering_connections():
         if c['Status']['Code'] == "deleted":
             continue
 
-        if c['RequesterVpcInfo']['OwnerId'] == my_account:
-            continue
+#        if c['RequesterVpcInfo']['OwnerId'] == my_account:
+#            continue
 
         active_connections.append(c)
 
