@@ -1,1 +1,2 @@
-nonproduction Business Unit Name  hostname  Business Service  Technical Service
+Name	BusinessUnit	Environment	BusinessService	TechnicalService
+host1	TEO	certification	HANA	HANA DB
