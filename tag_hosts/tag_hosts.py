@@ -30,6 +30,15 @@ parser.add_argument(
     help='AWS region name'
 )
 
+parser.add_argument(
+    '--debug',
+    '-d',
+    default=False,
+    help="Debug",
+    dest='debug',
+    action='store_true'
+)
+
 args = parser.parse_args()
 
 if args.region:
@@ -56,8 +65,9 @@ except ClientError as e:
 print("Done.")
 
 
-# Debug
-#ipdb.set_trace()
+if args.debug == True:
+    print("Debugging console - loading ipdb.set_trace()")
+    ipdb.set_trace()
 
 
 #
@@ -97,6 +107,10 @@ for i in reservations:
 
 print("Done.")
 
+if args.debug == True:
+    print("Debugging console - loading ipdb.set_trace()")
+    ipdb.set_trace()
+
 
 #
 # Process the csv file containing host names and tags
@@ -104,21 +118,41 @@ print("Done.")
 
 try:
     with open(args.input, newline='') as tsvfile:
+
         reader = csv.reader(tsvfile, delimiter='\t')
+
+        header_row = next(reader)
+        header_fields = {}
+        i = 0
+
+        for e in header_row:
+            header_fields[e] = i
+            i += 1
+
         for row in reader:
-            if row[2] in db:
-                print("Tagging: " + row[2] + " " + db[row[2]] +
-                      " BusinessUnit as " + row[1])
-                try:
-                    ec2.create_tags(Resources=[db[row[2]]], Tags=[{'Key':'Business Unit', 'Value':row[1]}])
-                except ClientError as e:
-                    print("Unexpected error: %s" % e)
-                    exit(1)
+
+            if row[header_fields['Name']] in db:
+
+                print("Tagging: " + row[header_fields['Name']] +
+                      " (" + db[row[header_fields['Name']]] + "):")
+
+                for i in header_row:
+
+                    if i == 'Name':
+                        continue
+
+                    print("  " + i + " = " + row[header_fields[i]])
+
+                # try:
+                #     ec2.create_tags(Resources=[db[row[2]]], Tags=[{'Key':'Business Unit', 'Value':row[1]}])
+                # except ClientError as e:
+                #     print("Unexpected error: %s" % e)
+                #     exit(1)
+
             else:
                 print("Entry not found: " + row[2])
+
 except (FileNotFoundError, IOError, OSError):
+
     print("Error opening file.")
     exit(1)
-
-# Debug
-#ipdb.set_trace()
