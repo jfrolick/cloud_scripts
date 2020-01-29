@@ -1,2 +1,2 @@
-Name	BusinessUnit	Environment	BusinessService	TechnicalService
-host1	TEO	certification	HANA	HANA DB
+Name	BusinessUnit	Department  Environment	BusinessService	TechnicalService  Owner ContactEmail
+host1	TEO	GBS certification	HANA	HANA DB Jane Smith  jane.smith@blah.com
