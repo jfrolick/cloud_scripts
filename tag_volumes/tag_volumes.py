@@ -9,7 +9,7 @@ import argparse
 import os
 
 
-allowedtags = [
+copytags = [
     'Name',
     'Owner',
     'BusinessUnit',
@@ -19,6 +19,8 @@ allowedtags = [
     'ContactEmail',
     'Hostname'
 ]
+
+dryrun = False
 
 
 #
@@ -64,6 +66,7 @@ try:
     reservations = ec2.describe_instances().get(
         'Reservations', []
         )
+
 except ClientError as e:
     print("Unexpected error: %s" % e)
     exit(1)
@@ -93,24 +96,63 @@ def flatten_tags(tags):
     return flattened
 
 
+#
+# Loop through reservations
+#
+
 for r in reservations:
+
     for i in r['Instances']:
+
         # ipdb.set_trace()
+
         tags = flatten_tags(i['Tags'])
         newtags = []
+
+        print ('Instance: ' + i['InstanceId'])
+
         if 'Name' not in tags:
             print("Skipping Instance" + ' ' + i['InstanceId'])
             continue
-        # print (i)
-        # print (i['Tags'])
+
         for b in i['BlockDeviceMappings']:
-            print (i['InstanceId'] + ' ' + b['DeviceName'] + " " + b['Ebs']['VolumeId'] + " " + b['Ebs']['Status'])
-            for key, value in tags.items():
-                if key not in allowedtags:
+
+            print ('  Tagging: ' + b['Ebs']['VolumeId'] + ' ' + b['DeviceName'])
+
+            # for key, value in tags.items():
+            #     if key not in copytags:
+            #         continue
+            #     if key == 'Name':
+            #         device = re.sub("\/dev\/",'',b['DeviceName'])
+            #         print ("Adding: " + key + ": " + value + "-" + device)
+            #         newtags
+            #     else:
+            #         print ("Adding: " + key + ": " + value)
+
+            for t in i['Tags']:
+                key = re.sub(' ','',t['Key'])
+                if key not in copytags:
                     continue
                 if key == 'Name':
                     device = re.sub("\/dev\/",'',b['DeviceName'])
-                    print ("Adding: " + key + ": " + value + "-" + device)
-                    newtags
+                    # print ("Adding: " + key + ": " + t['Value'] + "-" + device)
+                    value = t['Value'] + "-" + device
                 else:
-                    print ("Adding: " + key + ": " + value)
+                    # print ("Adding: " + key + ": " + t['Value'])
+                    value = t['Value']
+                newtags.append(
+                    {
+                        'Key': key,
+                        'Value': value
+                    }
+                )
+
+            try:
+                response = ec2.create_tags(
+                    DryRun = dryrun,
+                    Resources = [ b['Ebs']['VolumeId'] ],
+                    Tags = newtags
+                )
+            except Exception as e:
+                print("Unexpected error: %s" % e)
+                exit(1)
