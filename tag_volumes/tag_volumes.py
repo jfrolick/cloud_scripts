@@ -62,10 +62,11 @@ print("AWS Region: " + os.environ['DEFAULT_AWS_REGION'])
 ec2 = boto3.client('ec2')
 
 print("Describing instances.")
+
 try:
     reservations = ec2.describe_instances().get(
         'Reservations', []
-        )
+    )
 
 except ClientError as e:
     print("Unexpected error: %s" % e)
@@ -130,9 +131,12 @@ for r in reservations:
             #         print ("Adding: " + key + ": " + value)
 
             for t in i['Tags']:
+
                 key = re.sub(' ','',t['Key'])
+
                 if key not in copytags:
                     continue
+
                 if key == 'Name':
                     device = re.sub("\/dev\/",'',b['DeviceName'])
                     # print ("Adding: " + key + ": " + t['Value'] + "-" + device)
@@ -140,6 +144,7 @@ for r in reservations:
                 else:
                     # print ("Adding: " + key + ": " + t['Value'])
                     value = t['Value']
+
                 newtags.append(
                     {
                         'Key': key,
@@ -153,6 +158,7 @@ for r in reservations:
                     Resources = [ b['Ebs']['VolumeId'] ],
                     Tags = newtags
                 )
+
             except Exception as e:
                 print("Unexpected error: %s" % e)
                 exit(1)
