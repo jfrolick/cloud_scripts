@@ -17,7 +17,8 @@ copytags = [
     'TechnicalService',
     'Environment',
     'ContactEmail',
-    'Hostname'
+    'Hostname',
+    'CostID'
 ]
 
 dryrun = False
@@ -116,19 +117,15 @@ for r in reservations:
             print("Skipping Instance" + ' ' + i['InstanceId'])
             continue
 
+
+        for n in i['NetworkInterfaces']:
+
+            print ("  Tagging: " + n['NetworkInterfaceId'] + ' eth' + str(n['Attachment']['DeviceIndex']))
+
+
         for b in i['BlockDeviceMappings']:
 
             print ('  Tagging: ' + b['Ebs']['VolumeId'] + ' ' + b['DeviceName'])
-
-            # for key, value in tags.items():
-            #     if key not in copytags:
-            #         continue
-            #     if key == 'Name':
-            #         device = re.sub("\/dev\/",'',b['DeviceName'])
-            #         print ("Adding: " + key + ": " + value + "-" + device)
-            #         newtags
-            #     else:
-            #         print ("Adding: " + key + ": " + value)
 
             for t in i['Tags']:
 
