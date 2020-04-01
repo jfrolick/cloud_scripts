@@ -5,12 +5,14 @@ import boto3
 import sys
 import re
 import ipdb
+import os
 from botocore.exceptions import ClientError
 
 
 route_table_filter = 'private'
 
-ec2 = boto3.resource('ec2', region_name='us-east-1')
+region = os.getenv('AWS_DEFAULT_REGION')
+ec2 = boto3.resource('ec2', region_name=region)
 
 client = boto3.client('ec2')
 
