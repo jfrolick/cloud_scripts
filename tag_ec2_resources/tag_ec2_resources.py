@@ -124,6 +124,38 @@ for r in reservations:
 
             print ("  Tagging: " + n['NetworkInterfaceId'] + ' eth' + str(n['Attachment']['DeviceIndex']))
 
+            for t in i['Tags']:
+
+                key = re.sub(' ','',t['Key'])
+
+                if key not in copytags:
+                    continue
+
+                if key == 'Name':
+                    # print ("Adding: " + key + ": " + t['Value'] + "-eth" + str(n['Attachment']['DeviceIndex']))
+                    value = t['Value'] + '-eth' + str(n['Attachment']['DeviceIndex'])
+                else:
+                    # print ("Adding: " + key + ": " + t['Value'])
+                    value = t['Value']
+
+                newtags.append(
+                    {
+                        'Key': key,
+                        'Value': value
+                    }
+                )
+
+            try:
+                response = ec2.create_tags(
+                    DryRun = dryrun,
+                    Resources = [ n['NetworkInterfaceId'] ],
+                    Tags = newtags
+                )
+
+            except Exception as e:
+                print("Unexpected error: %s" % e)
+                exit(1)
+
 
         for b in i['BlockDeviceMappings']:
 
