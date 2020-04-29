@@ -109,15 +109,22 @@ def get_cidr_blocks(vpc_id):
 def get_vcp_name(vpc_id):
 
     for i in vpcs:
+
         if i['VpcId'] == vpc_id:
+
+            if not isinstance(i['Tags'], list):
+                return None
+
+            if 'Tags' in i.keys():
+                tags = flatten_tags(i['Tags'])
+
             tags = flatten_tags(i['Tags'])
-            # print json.dumps(
-            #     tags,
-            #     sort_keys=True,
-            #     indent=2,
-            #     separators=(',', ': ')
-            # )
-            return tags['Name']
+
+            if tags is None:
+                return None
+
+            if 'Name' in tags.keys():
+                return tags['Name']
 
     return ""
 
