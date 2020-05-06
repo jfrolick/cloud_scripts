@@ -12,7 +12,7 @@ from botocore.exceptions import ClientError
 
 client = boto3.client('route53')
 
-parser = argparse.ArgumentParser(description='Associate DNS with VPC.')
+parser = argparse.ArgumentParser(description='Associate DNS zone with VPC.')
 
 parser.add_argument(
     '--zone',

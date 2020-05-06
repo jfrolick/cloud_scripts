@@ -12,7 +12,7 @@ from botocore.exceptions import ClientError
 
 client = boto3.client('route53')
 
-parser = argparse.ArgumentParser(description='Peer DNS with VPC.')
+parser = argparse.ArgumentParser(description='Create Route53peering association authorization')
 
 parser.add_argument(
     '--zone',
