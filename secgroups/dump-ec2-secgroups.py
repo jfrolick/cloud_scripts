@@ -28,7 +28,6 @@ def main():
     # for page in group_iterator:
     #     for g in page['SecurityGroups']:
 
-
     instance_paginator = ec2.get_paginator('describe_instances')
     instance_iterator = instance_paginator.paginate()
 
@@ -49,24 +48,25 @@ def main():
 
                     # Ingress rules
                     for group in securitygroups['SecurityGroups']:
+                        
                         for ippermission in group['IpPermissions']:
 
-                            if ippermission['IpProtocol'] == "tcp":
-                                protocol = ippermission['IpProtocol']
+                            protocol = ippermission['IpProtocol']
+
+                            if 'FromPort' in ippermission.keys():
                                 fromport = str(ippermission['FromPort'])
-                                toport = str(ippermission['ToPort'])
-                            elif ippermission['IpProtocol'] == "udp":
-                                protocol = ippermission['IpProtocol']
-                                fromport = str(ippermission['FromPort'])
-                                toport = str(ippermission['ToPort'])
-                            elif ippermission['IpProtocol'] == "-1":
-                                protocol = "all"
-                                fromport = "0"
-                                toport = "65535"
                             else:
-                                protocol = "unknown"
-                                fromport = "unknown"
-                                toport = "unknown"
+                                fromport = 'none'
+
+                            if 'ToPort' in ippermission.keys():
+                                toport = str(ippermission['ToPort'])
+                            else:
+                                toport = 'none'
+
+                            if ippermission['IpProtocol'] == "-1":
+                                protocol = 'all'
+                                fromport = '0'
+                                toport = "65535"
 
 
                             for rule in ippermission['UserIdGroupPairs']:
@@ -107,22 +107,22 @@ def main():
 
                         for ippermission in group['IpPermissionsEgress']:
 
-                            if ippermission['IpProtocol'] == "tcp":
-                                protocol = ippermission['IpProtocol']
+                            protocol = ippermission['IpProtocol']
+
+                            if 'FromPort' in ippermission.keys():
                                 fromport = str(ippermission['FromPort'])
-                                toport = str(ippermission['ToPort'])
-                            elif ippermission['IpProtocol'] == "udp":
-                                protocol = ippermission['IpProtocol']
-                                fromport = str(ippermission['FromPort'])
-                                toport = str(ippermission['ToPort'])
-                            elif ippermission['IpProtocol'] == "-1":
-                                protocol = "all"
-                                fromport = "0"
-                                toport = "65535"
                             else:
-                                protocol = "unknown"
-                                fromport = "unknown"
-                                toport = "unknown"
+                                fromport = 'none'
+
+                            if 'ToPort' in ippermission.keys():
+                                toport = str(ippermission['ToPort'])
+                            else:
+                                toport = 'none'
+
+                            if ippermission['IpProtocol'] == "-1":
+                                protocol = 'all'
+                                fromport = '0'
+                                toport = "65535"
 
                             for rule in ippermission['UserIdGroupPairs']:
                                 print(
@@ -161,6 +161,7 @@ def main():
 def process_rules(rules):
     return ""
 
+
 def get_identifying_tags(tags):
 
     tags = flatten_tags(tags)
@@ -173,19 +174,20 @@ def get_identifying_tags(tags):
     if 'BusinessService' in tags.keys():
         bs = tags['BusinessService']
     else:
-        bu = "NONE"
+        bs = "NONE"
 
     if 'TechnicalService' in tags.keys():
         ts = tags['TechnicalService']
     else:
-        bu = "NONE"
+        ts = "NONE"
 
     if 'Name' in tags.keys():
         name = tags['Name']
     else:
-        bu = "NONE"
+        name = "NONE"
 
     return name, bu, bs, ts
+
 
 def get_account_number():
 
